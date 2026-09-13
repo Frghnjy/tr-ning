@@ -14,18 +14,18 @@
     <style>
         :root {
             --bg-color: #000000;
-            --card-bg: #181818;
+            --card-bg: #ffffff;
             --accent-color: #ff4757;
-            --text-color: #ffffff;
-            --text-dim: #a0a0a0;
-            --disabled-color: #222222;
+            --text-color: #000000;
+            --text-dim: #555555;
+            --disabled-color: #333333;
             --success-color: #2ed573;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
+            color: #ffffff;
             margin: 0;
             padding: 16px;
             display: flex;
@@ -34,7 +34,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        h1 { margin-bottom: 20px; font-size: 26px; text-align: center; font-weight: 800; letter-spacing: 0.5px; }
+        h1 { margin-bottom: 20px; font-size: 26px; text-align: center; font-weight: 800; letter-spacing: 0.5px; color: #ffffff; }
 
         .tabs-container {
             display: flex;
@@ -46,8 +46,8 @@
         }
 
         .tab-btn {
-            background-color: #2c2c2e;
-            color: var(--text-color);
+            background-color: #ffffff;
+            color: #000000;
             border: none;
             padding: 10px 14px;
             border-radius: 8px;
@@ -56,28 +56,29 @@
             font-size: 14px;
         }
 
-        .tab-btn.active { background-color: var(--accent-color); }
-        .tab-btn.disabled { background-color: var(--disabled-color); color: #555; cursor: not-allowed; opacity: 0.5; }
+        .tab-btn.active { background-color: var(--accent-color); color: #ffffff; }
+        .tab-btn.disabled { background-color: var(--disabled-color); color: #888888; cursor: not-allowed; opacity: 0.5; }
 
         .tab-content { display: none; width: 100%; max-width: 450px; }
         .tab-content.active { display: block; }
 
         .exercise-card {
             background-color: var(--card-bg);
-            border: 1px solid #2a2a2a;
+            color: var(--text-color);
+            border: 1px solid #dddddd;
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 10px rgba(255,255,255,0.1);
         }
 
-        .exercise-title { font-size: 17px; font-weight: bold; margin-bottom: 12px; }
+        .exercise-title { font-size: 17px; font-weight: bold; margin-bottom: 12px; color: #000000; }
 
         .media-container {
             width: 100%;
             border-radius: 8px;
             overflow: hidden;
-            background-color: #000;
+            background-color: #f0f0f0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -88,8 +89,8 @@
         .placeholder-box {
             width: 100%;
             padding: 20px 0;
-            background-color: #222;
-            border: 2px dashed #444;
+            background-color: #f5f5f5;
+            border: 2px dashed #ccc;
             border-radius: 8px;
             text-align: center;
             color: var(--text-dim);
@@ -98,14 +99,15 @@
 
         .upload-btn-wrapper { margin-top: 10px; display: flex; gap: 8px; }
         .upload-btn {
-            background-color: #333;
-            color: #fff;
+            background-color: #e0e0e0;
+            color: #000000;
             padding: 8px 12px;
             border-radius: 6px;
             font-size: 13px;
             cursor: pointer;
             display: inline-block;
-            border: 1px solid #555;
+            border: 1px solid #ccc;
+            font-weight: 600;
         }
         .remove-btn {
             background-color: #ff4757;
@@ -123,7 +125,7 @@
             gap: 10px;
             margin-top: 12px;
             padding-top: 12px;
-            border-top: 1px solid #2a2a2a;
+            border-top: 1px solid #eee;
         }
 
         .log-input-wrapper {
@@ -143,18 +145,19 @@
         .log-input {
             width: 100%;
             padding: 8px;
-            background-color: #2c2c2e;
-            border: 1px solid #444;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
             border-radius: 6px;
-            color: #fff;
+            color: #000000;
             font-size: 14px;
             box-sizing: border-box;
+            font-weight: 600;
         }
 
         .timer-wrapper {
             margin-top: 12px;
             padding-top: 12px;
-            border-top: 1px solid #2a2a2a;
+            border-top: 1px solid #eee;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -184,19 +187,21 @@
         .btn-stop { background-color: #ff4757; }
 
         .run-select {
-            background-color: #333;
-            color: #fff;
-            border: 1px solid #555;
+            background-color: #f0f0f0;
+            color: #000000;
+            border: 1px solid #ccc;
             padding: 5px;
             border-radius: 6px;
+            font-weight: 600;
         }
 
-        .calendar-container { background-color: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid #2a2a2a; }
+        .calendar-container { background-color: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid #dddddd; color: #000000; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px; }
         .day-name { font-weight: bold; color: var(--text-dim); font-size: 11px; padding-bottom: 4px; }
         
         .day-cell {
-            background-color: #2c2c2e;
+            background-color: #f0f0f0;
+            color: #000000;
             padding: 8px 2px;
             border-radius: 6px;
             min-height: 55px;
@@ -205,16 +210,18 @@
             justify-content: space-between;
             align-items: center;
             font-size: 12px;
+            font-weight: bold;
             cursor: pointer;
             user-select: none;
+            border: 1px solid #e0e0e0;
         }
 
-        .day-cell.trained { border: 2px solid var(--success-color); background-color: #11261a; }
+        .day-cell.trained { border: 2px solid var(--success-color); background-color: #e8fae8; }
         .check-mark { color: var(--success-color); font-weight: bold; font-size: 18px; margin-top: 4px; }
         .weight-tag { font-size: 11px; color: var(--accent-color); font-weight: bold; margin-top: 4px; }
         
         .cal-btn {
-            background-color: #333;
+            background-color: #000000;
             border: none;
             color: #fff;
             font-size: 10px;
@@ -249,7 +256,7 @@
     
     <div id="dage" class="tab-content">
         <div class="calendar-container">
-            <h3 style="margin:0 0 10px 0; font-size: 16px; text-align: center;">Træningsdage (Klik for automatisk ✓)</h3>
+            <h3 style="margin:0 0 10px 0; font-size: 16px; text-align: center; color: #000;">Træningsdage (Klik for automatisk ✓)</h3>
             <div class="calendar-grid">
                 <div class="day-name">Man</div><div class="day-name">Tir</div><div class="day-name">Ons</div>
                 <div class="day-name">Tor</div><div class="day-name">Fre</div><div class="day-name">Lør</div>
@@ -266,7 +273,7 @@
         </div>
 
         <div class="calendar-container">
-            <h3 style="margin:0 0 10px 0; font-size: 16px; text-align: center;">Vægt Kalender</h3>
+            <h3 style="margin:0 0 10px 0; font-size: 16px; text-align: center; color: #000;">Vægt Kalender</h3>
             <div class="calendar-grid">
                 <div class="day-name">Man</div><div class="day-name">Tir</div><div class="day-name">Ons</div>
                 <div class="day-name">Tor</div><div class="day-name">Fre</div><div class="day-name">Lør</div>
@@ -401,7 +408,6 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Komprimerer og konverterer billedet til Base64 for permanent lagring
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
