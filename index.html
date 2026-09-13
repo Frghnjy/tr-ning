@@ -383,11 +383,11 @@
                             <div class="sets-container">
                                 <div class="log-input-group">
                                     <div class="log-input-wrapper">
-                                        <label>Minutter</label>
+                                        <label>Tid (min)</label>
                                         <input type="number" step="any" class="log-input" placeholder="0" value="${savedMin}" onchange="saveLog('min-${ex.id}', this.value)">
                                     </div>
                                     <div class="log-input-wrapper">
-                                        <label>Km</label>
+                                        <label>KM</label>
                                         <input type="number" step="any" class="log-input" placeholder="0" value="${savedKm}" onchange="saveLog('km-${ex.id}', this.value)">
                                     </div>
                                 </div>
@@ -401,11 +401,11 @@
                                 <div class="log-input-group">
                                     <span class="set-label">Sæt ${s}</span>
                                     <div class="log-input-wrapper">
-                                        ${s === 1 ? '<label>Kg</label>' : ''}
+                                        <label>KG</label>
                                         <input type="number" step="any" class="log-input" placeholder="0" value="${savedKg}" onchange="saveLog('kg-${ex.id}-s${s}', this.value)">
                                     </div>
                                     <div class="log-input-wrapper">
-                                        ${s === 1 ? '<label>Reps</label>' : ''}
+                                        <label>REPS</label>
                                         <input type="number" class="log-input" placeholder="0" value="${savedReps}" onchange="saveLog('reps-${ex.id}-s${s}', this.value)">
                                     </div>
                                 </div>`;
@@ -443,7 +443,6 @@
                 });
             });
 
-            // Opdater også vægt-fanens billede hvis det findes
             const savedVaegtMedia = localStorage.getItem('media-data-vaegt-card');
             if (savedVaegtMedia) {
                 const vaegtContainer = document.getElementById('media-vaegt-card');
