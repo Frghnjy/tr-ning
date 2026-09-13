@@ -96,7 +96,7 @@
             font-weight: 500;
         }
 
-        .upload-btn-wrapper { margin-top: 10px; }
+        .upload-btn-wrapper { margin-top: 10px; display: flex; gap: 8px; }
         .upload-btn {
             background-color: #333;
             color: #fff;
@@ -106,6 +106,15 @@
             cursor: pointer;
             display: inline-block;
             border: 1px solid #555;
+        }
+        .remove-btn {
+            background-color: #ff4757;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
         }
         .file-input { display: none; }
 
@@ -270,25 +279,25 @@
     <script>
         const program = {
             mandag: [
-                { id: 'm1', name: 'Pec Deck Fly', upload: false },
-                { id: 'm2', name: 'Machine Shoulder Press', upload: false },
-                { id: 'm3', name: 'Seated Machine Triceps Dip', upload: false },
-                { id: 'm4', name: 'Cable V-Bar Overhead Triceps Extension', upload: false },
-                { id: 'm5', name: 'Lateral Raise', upload: false }
+                { id: 'm1', name: 'Pec Deck Fly', upload: true },
+                { id: 'm2', name: 'Machine Shoulder Press', upload: true },
+                { id: 'm3', name: 'Seated Machine Triceps Dip', upload: true },
+                { id: 'm4', name: 'Cable V-Bar Overhead Triceps Extension', upload: true },
+                { id: 'm5', name: 'Lateral Raise', upload: true }
             ],
             tirsdag: [
-                { id: 't1', name: 'Close Grip Cable Lat Pulldown', upload: false },
-                { id: 't2', name: 'Cable Row', upload: false },
-                { id: 't3', name: 'Machine Row', upload: false },
-                { id: 't4', name: 'Machine Rear Delt Fly', upload: false },
-                { id: 't5', name: 'Hammer Curl', upload: false },
-                { id: 't6', name: 'Bayesian Curl', upload: false }
+                { id: 't1', name: 'Close Grip Cable Lat Pulldown', upload: true },
+                { id: 't2', name: 'Cable Row', upload: true },
+                { id: 't3', name: 'Machine Row', upload: true },
+                { id: 't4', name: 'Machine Rear Delt Fly', upload: true },
+                { id: 't5', name: 'Hammer Curl', upload: true },
+                { id: 't6', name: 'Bayesian Curl', upload: true }
             ],
             onsdag: [
                 { id: 'o1', name: 'Løb - 2-5 min', upload: false, isRun: true },
-                { id: 'o2', name: 'Leg Extension', upload: false },
-                { id: 'o3', name: 'Leg Press', upload: false },
-                { id: 'o4', name: 'Calf Raise Seated', upload: false },
+                { id: 'o2', name: 'Leg Extension', upload: true },
+                { id: 'o3', name: 'Leg Press', upload: true },
+                { id: 'o4', name: 'Calf Raise Seated', upload: true },
                 { id: 'o5', name: 'Kneeling Cable Crunch', upload: true },
                 { id: 'o6', name: 'Loaded Crunch', upload: true },
                 { id: 'o7', name: 'Hip Adduction', upload: true },
@@ -305,7 +314,7 @@
                 { id: 'f8', name: 'Lateral Raise', upload: true }
             ],
             sondag: [
-                { id: 's1', name: 'Løb - 2-5 min', upload: true, isRun: true },
+                { id: 's1', name: 'Løb - 2-5 min', upload: false, isRun: true },
                 { id: 's2', name: 'Leg Extensions', upload: true },
                 { id: 's3', name: 'Seated Hamstring Curl', upload: true },
                 { id: 's4', name: 'Leg Press', upload: true },
@@ -325,16 +334,21 @@
 
                     const savedKg = localStorage.getItem(`kg-${ex.id}`) || '';
                     const savedReps = localStorage.getItem(`reps-${ex.id}`) || '';
+                    const savedMedia = localStorage.getItem(`media-data-${ex.id}`);
 
-                    let mediaHtml = ex.upload ? 
-                        `<div class="placeholder-box">Ingen video valgt</div>` : 
-                        `<div class="placeholder-box">Snart</div>`;
+                    let mediaHtml = `<div class="placeholder-box">Ingen mediefil tilføjet</div>`;
+                    if (savedMedia) {
+                        mediaHtml = `<img src="${savedMedia}" />`;
+                    } else if (!ex.upload) {
+                        mediaHtml = `<div class="placeholder-box">Snart</div>`;
+                    }
 
                     let uploadHtml = ex.upload ? `
                         <div class="upload-btn-wrapper">
-                            <label class="upload-btn">Vælg video/billede
-                                <input type="file" class="file-input" accept="video/*,image/*" onchange="loadMedia(event, '${containerId}')">
+                            <label class="upload-btn">Vælg Billede
+                                <input type="file" class="file-input" accept="image/*" onchange="savePermanentImage(event, '${ex.id}')">
                             </label>
+                            ${savedMedia ? `<button class="remove-btn" onclick="removeImage('${ex.id}')">Slet</button>` : ''}
                         </div>` : '';
 
                     let timerControls = ex.isRun ? `
@@ -383,6 +397,43 @@
             localStorage.setItem(key, value);
         }
 
+        function savePermanentImage(event, exId) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Komprimerer og konverterer billedet til Base64 for permanent lagring
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 600;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    try {
+                        localStorage.setItem(`media-data-${exId}`, compressedBase64);
+                        location.reload();
+                    } catch(err) {
+                        alert("Billedfilen er for stor til at gemme i browserens hukommelse.");
+                    }
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage(exId) {
+            localStorage.removeItem(`media-data-${exId}`);
+            location.reload();
+        }
+
         function openTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -392,26 +443,6 @@
 
             if (tabName === 'dage') renderTrainingCalendar();
             if (tabName === 'vaegt') renderWeightCalendar();
-        }
-
-        function loadMedia(event, containerId) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            const fileURL = URL.createObjectURL(file);
-
-            if (file.type.startsWith('video/')) {
-                const video = document.createElement('video');
-                video.src = fileURL;
-                video.controls = true;
-                container.appendChild(video);
-            } else {
-                const img = document.createElement('img');
-                img.src = fileURL;
-                container.appendChild(img);
-            }
         }
 
         let activeTimers = {};
