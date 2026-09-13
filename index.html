@@ -209,16 +209,17 @@
             font-weight: 600;
         }
 
-        .calendar-container { background-color: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid #dddddd; color: #000000; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px; }
+        .calendar-container { background-color: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid #dddddd; color: #000000; margin-bottom: 20px; }
+        .month-header { font-size: 16px; font-weight: 800; text-align: center; margin: 15px 0 8px 0; color: #000000; text-transform: capitalize; border-bottom: 2px solid #f0f0f0; padding-bottom: 4px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
         .day-name { font-weight: bold; color: var(--text-dim); font-size: 11px; padding-bottom: 4px; }
         
         .day-cell {
             background-color: #f0f0f0;
             color: #000000;
-            padding: 8px 2px;
+            padding: 6px 2px;
             border-radius: 6px;
-            min-height: 55px;
+            min-height: 50px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -230,18 +231,19 @@
             border: 1px solid #e0e0e0;
         }
 
+        .day-cell.empty { background-color: transparent; border: none; cursor: default; }
         .day-cell.trained { border: 2px solid var(--success-color); background-color: #e8fae8; }
-        .check-mark { color: var(--success-color); font-weight: bold; font-size: 18px; margin-top: 4px; }
-        .weight-tag { font-size: 11px; color: var(--accent-color); font-weight: bold; margin-top: 4px; }
+        .check-mark { color: var(--success-color); font-weight: bold; font-size: 16px; margin-top: 2px; }
+        .weight-tag { font-size: 10px; color: var(--accent-color); font-weight: bold; margin-top: 2px; }
         
         .cal-btn {
             background-color: #000000;
             border: none;
             color: #fff;
-            font-size: 10px;
-            padding: 4px 6px;
+            font-size: 9px;
+            padding: 3px 5px;
             border-radius: 4px;
-            margin-top: 4px;
+            margin-top: 2px;
             cursor: pointer;
         }
     </style>
@@ -270,13 +272,8 @@
     
     <div id="dage" class="tab-content">
         <div class="calendar-container">
-            <h3 style="margin:0 0 10px 0; font-size: 16px; text-align: center; color: #000;">Træningsdage (Klik for automatisk ✓)</h3>
-            <div class="calendar-grid">
-                <div class="day-name">Man</div><div class="day-name">Tir</div><div class="day-name">Ons</div>
-                <div class="day-name">Tor</div><div class="day-name">Fre</div><div class="day-name">Lør</div>
-                <div class="day-name">Søn</div>
-            </div>
-            <div class="calendar-grid" id="training-calendar-days"></div>
+            <h3 style="margin:0 0 10px 0; font-size: 18px; text-align: center; color: #000;">Træningskalender</h3>
+            <div id="training-calendar-months"></div>
         </div>
     </div>
 
@@ -294,13 +291,8 @@
         </div>
 
         <div class="calendar-container">
-            <h3 style="margin:0 0 10px 0; font-size: 16px; text-align: center; color: #000;">Vægt Kalender</h3>
-            <div class="calendar-grid">
-                <div class="day-name">Man</div><div class="day-name">Tir</div><div class="day-name">Ons</div>
-                <div class="day-name">Tor</div><div class="day-name">Fre</div><div class="day-name">Lør</div>
-                <div class="day-name">Søn</div>
-            </div>
-            <div class="calendar-grid" id="weight-calendar-days"></div>
+            <h3 style="margin:0 0 10px 0; font-size: 18px; text-align: center; color: #000;">Vægtkalender</h3>
+            <div id="weight-calendar-months"></div>
         </div>
     </div>
 
@@ -452,8 +444,17 @@
             }
         }
 
+        function autoMarkTodayTrained() {
+            const now = new Date();
+            const dateKey = `train-${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+            localStorage.setItem(dateKey, 'true');
+        }
+
         function saveLog(key, value) {
             localStorage.setItem(key, value);
+            if (value.trim() !== '') {
+                autoMarkTodayTrained();
+            }
         }
 
         function savePermanentImage(event, exId) {
@@ -560,67 +561,128 @@
             element.innerText = `${m}:${s}`;
         }
 
+        function getFirstDayOffset(year, month) {
+            const day = new Date(year, month, 1).getDay();
+            return day === 0 ? 6 : day - 1; // Mandag = 0, Søndag = 6
+        }
+
         function renderTrainingCalendar() {
-            const grid = document.getElementById('training-calendar-days');
-            grid.innerHTML = '';
+            const container = document.getElementById('training-calendar-months');
+            container.innerHTML = '';
 
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const startYear = today.getFullYear();
+            const startMonth = today.getMonth();
 
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateKey = `train-${year}-${month + 1}-${day}`;
-                const isTrained = localStorage.getItem(dateKey) === 'true';
+            for (let m = 0; m < 12; m++) {
+                const date = new Date(startYear, startMonth + m, 1);
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                const monthName = date.toLocaleString('da-DK', { month: 'long', year: 'numeric' });
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const firstDayOffset = getFirstDayOffset(year, month);
 
-                const cell = document.createElement('div');
-                cell.className = `day-cell ${isTrained ? 'trained' : ''}`;
-                cell.innerHTML = `<span>${day}</span>${isTrained ? '<span class="check-mark">✓</span>' : ''}`;
+                const monthSection = document.createElement('div');
+                monthSection.innerHTML = `
+                    <div class="month-header">${monthName}</div>
+                    <div class="calendar-grid">
+                        <div class="day-name">Man</div><div class="day-name">Tir</div><div class="day-name">Ons</div>
+                        <div class="day-name">Tor</div><div class="day-name">Fre</div><div class="day-name">Lør</div>
+                        <div class="day-name">Søn</div>
+                    </div>
+                    <div class="calendar-grid" id="train-grid-${year}-${month}"></div>
+                `;
+                container.appendChild(monthSection);
 
-                cell.onclick = () => {
-                    const newState = !isTrained;
-                    localStorage.setItem(dateKey, newState);
-                    renderTrainingCalendar();
-                };
+                const grid = document.getElementById(`train-grid-${year}-${month}`);
 
-                grid.appendChild(cell);
+                for (let i = 0; i < firstDayOffset; i++) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = 'day-cell empty';
+                    grid.appendChild(emptyCell);
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateKey = `train-${year}-${month + 1}-${day}`;
+                    const isTrained = localStorage.getItem(dateKey) === 'true';
+
+                    const cell = document.createElement('div');
+                    cell.className = `day-cell ${isTrained ? 'trained' : ''}`;
+                    cell.innerHTML = `<span>${day}</span>${isTrained ? '<span class="check-mark">✓</span>' : ''}`;
+
+                    cell.onclick = () => {
+                        const newState = !isTrained;
+                        localStorage.setItem(dateKey, newState);
+                        renderTrainingCalendar();
+                    };
+
+                    grid.appendChild(cell);
+                }
             }
         }
 
         function renderWeightCalendar() {
-            const grid = document.getElementById('weight-calendar-days');
-            grid.innerHTML = '';
+            const container = document.getElementById('weight-calendar-months');
+            container.innerHTML = '';
 
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const startYear = today.getFullYear();
+            const startMonth = today.getMonth();
 
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateKey = `weight-${year}-${month + 1}-${day}`;
-                const savedWeight = localStorage.getItem(dateKey) || '';
+            for (let m = 0; m < 12; m++) {
+                const date = new Date(startYear, startMonth + m, 1);
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                const monthName = date.toLocaleString('da-DK', { month: 'long', year: 'numeric' });
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const firstDayOffset = getFirstDayOffset(year, month);
 
-                const cell = document.createElement('div');
-                cell.className = 'day-cell';
-                
-                let content = `<span>${day}</span>`;
-                if (savedWeight) content += `<span class="weight-tag">${savedWeight} kg</span>`;
-                cell.innerHTML = content;
+                const monthSection = document.createElement('div');
+                monthSection.innerHTML = `
+                    <div class="month-header">${monthName}</div>
+                    <div class="calendar-grid">
+                        <div class="day-name">Man</div><div class="day-name">Tir</div><div class="day-name">Ons</div>
+                        <div class="day-name">Tor</div><div class="day-name">Fre</div><div class="day-name">Lør</div>
+                        <div class="day-name">Søn</div>
+                    </div>
+                    <div class="calendar-grid" id="weight-grid-${year}-${month}"></div>
+                `;
+                container.appendChild(monthSection);
 
-                const btn = document.createElement('button');
-                btn.className = 'cal-btn';
-                btn.innerText = 'Vægt';
-                btn.onclick = (e) => {
-                    e.stopPropagation();
-                    const input = prompt(`Indtast vægt for d. ${day}/${month + 1}:`, savedWeight);
-                    if (input !== null) {
-                        localStorage.setItem(dateKey, input.trim());
-                        renderWeightCalendar();
-                    }
-                };
+                const grid = document.getElementById(`weight-grid-${year}-${month}`);
 
-                cell.appendChild(btn);
-                grid.appendChild(cell);
+                for (let i = 0; i < firstDayOffset; i++) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = 'day-cell empty';
+                    grid.appendChild(emptyCell);
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateKey = `weight-${year}-${month + 1}-${day}`;
+                    const savedWeight = localStorage.getItem(dateKey) || '';
+
+                    const cell = document.createElement('div');
+                    cell.className = 'day-cell';
+                    
+                    let content = `<span>${day}</span>`;
+                    if (savedWeight) content += `<span class="weight-tag">${savedWeight} kg</span>`;
+                    cell.innerHTML = content;
+
+                    const btn = document.createElement('button');
+                    btn.className = 'cal-btn';
+                    btn.innerText = 'Vægt';
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        const input = prompt(`Indtast vægt for d. ${day}/${month + 1}:`, savedWeight);
+                        if (input !== null) {
+                            localStorage.setItem(dateKey, input.trim());
+                            renderWeightCalendar();
+                        }
+                    };
+
+                    cell.appendChild(btn);
+                    grid.appendChild(cell);
+                }
             }
         }
 
